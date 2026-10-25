@@ -6,7 +6,9 @@
 <title>우리 집 장보기</title>
 <style>
   :root {
-    --bg: #FAF7EF;
+    --bg: #EEF2EA;
+    --bg-glow: #F8F6EE;
+    --bg-shade: #DCE6D8;
     --card: #FFFFFF;
     --green: #3F8F4E;
     --green-dark: #2E6B3A;
@@ -20,7 +22,13 @@
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: var(--bg);
+    min-height: 100vh;
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 15% 0%, var(--bg-glow) 0%, transparent 55%),
+      radial-gradient(ellipse at 100% 100%, var(--bg-shade) 0%, transparent 60%),
+      linear-gradient(160deg, var(--bg-glow) 0%, var(--bg) 45%, var(--bg-shade) 100%);
+    background-attachment: fixed;
     color: var(--text);
     font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
     line-height: 1.5;
