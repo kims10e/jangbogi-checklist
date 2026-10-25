@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우리 집 장보기</title>
+<style>
+  :root {
+    --bg: #FAF7EF;
+    --card: #FFFFFF;
+    --green: #3F8F4E;
+    --green-dark: #2E6B3A;
+    --mint: #E3F1E4;
+    --text: #2B3A2E;
+    --muted: #8A968C;
+    --line: #EDE8DA;
+    --danger: #C9584B;
+    --shadow: 0 2px 10px rgba(63, 90, 60, 0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    margin-bottom: 18px;
+  }
+  h1 { margin: 0; font-size: 1.7rem; color: var(--green-dark); letter-spacing: -0.02em; }
+  h1 span { font-size: 1.5rem; }
+  .reset-btn {
+    border: 1.5px solid var(--green); background: var(--card); color: var(--green);
+    border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+  }
+  .reset-btn:hover { background: var(--mint); }
+
+  .add-bar {
+    background: var(--card); border-radius: 18px; box-shadow: var(--shadow);
+    padding: 14px; display: grid; gap: 10px;
+    grid-template-columns: 2fr 1.4fr 1.4fr auto;
+    margin-bottom: 22px;
+  }
+  .add-bar input, .add-bar select {
+    font: inherit; font-size: 0.95rem; color: var(--text);
+    border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px;
+    background: #FDFCF8; min-width: 0; width: 100%;
+  }
+  .add-bar input:focus, .add-bar select:focus { outline: none; border-color: var(--green); }
+  .add-bar button {
+    font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 10px 18px;
+    background: var(--green); color: #fff; cursor: pointer;
+  }
+  .add-bar button:hover { background: var(--green-dark); }
+  @media (max-width: 560px) {
+    .add-bar { grid-template-columns: 1fr 1fr; }
+    .add-bar .name { grid-column: 1 / -1; }
+    .add-bar button { grid-column: 1 / -1; }
+    h1 { font-size: 1.4rem; }
+  }
+
+  .category {
+    background: var(--card); border-radius: 20px; box-shadow: var(--shadow);
+    padding: 16px 18px 8px; margin-bottom: 16px;
+  }
+  .category h2 {
+    margin: 0 0 6px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;
+  }
+  .category h2 .count {
+    margin-left: auto; font-size: 0.8rem; font-weight: 600; color: var(--green);
+    background: var(--mint); border-radius: 999px; padding: 2px 10px;
+  }
+  .category ul { list-style: none; margin: 0; padding: 0; }
+  .empty { color: var(--muted); font-size: 0.9rem; padding: 8px 0 12px; }
+
+  .item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0; border-top: 1px dashed var(--line);
+  }
+  .item:first-child { border-top: 0; }
+  .item label { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; min-width: 0; }
+  .item input[type=checkbox] {
+    appearance: none; -webkit-appearance: none; flex: none;
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid #B9D3BC; background: #fff; cursor: pointer;
+    display: grid; place-content: center; transition: background .15s, border-color .15s;
+  }
+  .item input[type=checkbox]::after {
+    content: ""; width: 7px; height: 12px; margin-top: -3px;
+    border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg) scale(0);
+    transition: transform .15s;
+  }
+  .item input[type=checkbox]:checked { background: var(--green); border-color: var(--green); }
+  .item input[type=checkbox]:checked::after { transform: rotate(45deg) scale(1); }
+  .item input[type=checkbox]:focus-visible { outline: 3px solid var(--mint); outline-offset: 2px; }
+  .text { min-width: 0; overflow-wrap: anywhere; }
+  .name { font-size: 1rem; }
+  .memo { color: var(--muted); font-size: 0.85rem; margin-left: 6px; }
+  .item.done .name, .item.done .memo { text-decoration: line-through; opacity: 0.45; }
+  .del {
+    border: 0; background: transparent; cursor: pointer; font-size: 1.05rem;
+    padding: 6px 8px; border-radius: 10px; opacity: 0.5; flex: none;
+  }
+  .del:hover { opacity: 1; background: #FBEAE7; }
+
+  footer { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span>🧺</span> 우리 집 장보기</h1>
+    <button class="reset-btn" id="resetBtn" type="button">🔄 새 장보기</button>
+  </header>
+
+  <form class="add-bar" id="addForm" autocomplete="off">
+    <input class="name" id="newName" placeholder="추가할 품목 (예: 콩나물)" required maxlength="40">
+    <select id="newCat" aria-label="카테고리"></select>
+    <input id="newMemo" placeholder="수량·메모 (선택)" maxlength="30">
+    <button type="submit">추가</button>
+  </form>
+
+  <main id="list"></main>
+
+  <footer>이 브라우저에만 자동 저장됩니다.</footer>
+</div>
+
+<script>
+  const STORAGE_KEY = "home-shopping-list-v1";
+
+  const CATEGORIES = [
+    { id: "produce", icon: "🥬", name: "채소·과일" },
+    { id: "meat", icon: "🥩", name: "정육·수산" },
+    { id: "dairy", icon: "🥛", name: "유제품·계란" },
+    { id: "pantry", icon: "🍚", name: "곡물·양념·가공" },
+    { id: "household", icon: "🧻", name: "생활용품" },
+  ];
+
+  const STARTER = {
+    produce: ["대파", "양파", "감자", "사과"],
+    meat: ["돼지고기", "닭고기", "고등어"],
+    dairy: ["우유", "계란", "두부"],
+    pantry: ["쌀", "라면", "간장"],
+    household: ["휴지", "주방세제"],
+  };
+
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  function starterItems() {
+    return Object.entries(STARTER).flatMap(([cat, names]) =>
+      names.map(name => ({ id: newId(), cat, name, memo: "", done: false })));
+  }
+
+  function load() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (Array.isArray(saved)) return saved;
+    } catch (e) {}
+    return starterItems();
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch (e) {}
+  }
+
+  let items = load();
+  save();
+
+  const listEl = document.getElementById("list");
+  const catSelect = document.getElementById("newCat");
+  catSelect.innerHTML = CATEGORIES.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join("");
+
+  function render() {
+    listEl.innerHTML = "";
+    for (const cat of CATEGORIES) {
+      const catItems = items.filter(i => i.cat === cat.id);
+      const doneCount = catItems.filter(i => i.done).length;
+
+      const section = document.createElement("section");
+      section.className = "category";
+      section.innerHTML = `<h2>${cat.icon} ${cat.name}<span class="count">${doneCount} / ${catItems.length}</span></h2>`;
+
+      const ul = document.createElement("ul");
+      if (catItems.length === 0) {
+        ul.innerHTML = `<li class="empty">아직 품목이 없어요.</li>`;
+      }
+      for (const item of catItems) {
+        const li = document.createElement("li");
+        li.className = "item" + (item.done ? " done" : "");
+
+        const label = document.createElement("label");
+        const box = document.createElement("input");
+        box.type = "checkbox";
+        box.checked = item.done;
+        box.addEventListener("change", () => {
+          item.done = box.checked;
+          save();
+          render();
+        });
+
+        const text = document.createElement("span");
+        text.className = "text";
+        const name = document.createElement("span");
+        name.className = "name";
+        name.textContent = item.name;
+        text.append(name);
+        if (item.memo) {
+          const memo = document.createElement("span");
+          memo.className = "memo";
+          memo.textContent = item.memo;
+          text.append(memo);
+        }
+        label.append(box, text);
+
+        const del = document.createElement("button");
+        del.className = "del";
+        del.type = "button";
+        del.title = "삭제";
+        del.setAttribute("aria-label", `${item.name} 삭제`);
+        del.textContent = "🗑";
+        del.addEventListener("click", () => {
+          items = items.filter(i => i.id !== item.id);
+          save();
+          render();
+        });
+
+        li.append(label, del);
+        ul.append(li);
+      }
+      section.append(ul);
+      listEl.append(section);
+    }
+  }
+
+  document.getElementById("addForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const nameInput = document.getElementById("newName");
+    const memoInput = document.getElementById("newMemo");
+    const name = nameInput.value.trim();
+    if (!name) return;
+    items.push({ id: newId(), cat: catSelect.value, name, memo: memoInput.value.trim(), done: false });
+    save();
+    render();
+    nameInput.value = "";
+    memoInput.value = "";
+    nameInput.focus();
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    if (!items.some(i => i.done)) return;
+    if (!confirm("체크를 모두 해제할까요? 품목은 그대로 남아요.")) return;
+    items.forEach(i => { i.done = false; });
+    save();
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>
